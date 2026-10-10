@@ -255,6 +255,17 @@ python -m unittest discover tests -v
 
 ---
 
-## 📜 License
+### License & Credits
+Internship: CodeNova Internship Program • Batch 01 (Cybersecurity)
 
-This project is licensed under the [MIT License](LICENSE).
+Task: Task 1 — Password Strength Checker (Credential Auditing & Entropy)
+
+Author: Sourabh Jala (Sourabh2006)
+
+Alias / GitHub: @Sourabh2006
+
+Contact: skumarjala@gmail.com
+
+License: MIT Open Source
+
+
