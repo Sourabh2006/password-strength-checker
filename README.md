@@ -255,54 +255,6 @@ python -m unittest discover tests -v
 
 ---
 
-## 📤 How to Upload this Project to GitHub
-
-Follow any of the three methods below to upload your project to GitHub:
-
-### Method 1: Using Git Command Line (Recommended)
-
-1. Open PowerShell or Command Prompt in this project directory:
-   ```bash
-   cd "c:\Users\Sourang_official\OneDrive\Documents\codenova\New folder"
-   ```
-2. Initialize Git, stage files, and make your first commit:
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: Password Strength Checker with Native & Web GUI"
-   ```
-3. Create a new repository on [github.com](https://github.com/new) named `password-strength-checker` (keep it public, do not initialize with README since you already have one).
-4. Link your remote repository and push:
-   ```bash
-   git branch -M main
-   git remote add origin https://github.com/YOUR_GITHUB_USERNAME/password-strength-checker.git
-   git push -u origin main
-   ```
-
-*(If `git` is not installed on your system, install it in 1 minute by downloading [Git for Windows](https://git-scm.com/download/win) or running `winget install --id Git.Git -e` in PowerShell).*
-
----
-
-### Method 2: Using GitHub Desktop (Graphical / No Commands)
-
-1. Download and open [GitHub Desktop](https://desktop.github.com/).
-2. Click **File** > **Add Local Repository...**.
-3. Choose this folder path (`c:\Users\Sourang_official\OneDrive\Documents\codenova\New folder`).
-4. If prompted that the folder is not a Git repository, click **create a repository here**.
-5. Write commit summary: `Initial commit: Password Strength Checker with GUI`.
-6. Click **Publish repository** to push it directly to your GitHub profile!
-
----
-
-### Method 3: Using Web Browser Upload (Drag-and-Drop)
-
-1. Go to [github.com/new](https://github.com/new) and create a repository named `password-strength-checker`.
-2. On the new repository page, click the link: **"uploading an existing file"**.
-3. Drag and drop all project files and folders (`src/`, `tests/`, `web/`, `gui.py`, `app.py`, `web_gui.py`, `cli.py`, `README.md`, `LICENSE`, `requirements.txt`, etc.).
-4. Click **Commit changes**.
-
----
-
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
