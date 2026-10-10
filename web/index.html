@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PassGuard — Credential Auditing & Entropy Engine</title>
+  <style>
+    :root {
+      --bg: #0b1120;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --cyan: #06b6d4;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --crimson: #ef4444;
+      --blue: #3b82f6;
+      --purple: #8b5cf6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .brand h1 {
+      font-size: 24px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .privacy-tag {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--emerald);
+      color: var(--emerald);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    /* Input area */
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      background: #090d16;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 18px;
+      padding: 14px 110px 14px 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus, input[type="password"]:focus {
+      border-color: var(--cyan);
+    }
+
+    .input-actions {
+      position: absolute;
+      right: 12px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: #334155;
+      color: var(--text);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-icon:hover { background: #475569; }
+
+    /* Meter */
+    .meter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .score-badge {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .level-pill {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 6px;
+      color: #fff;
+      text-transform: uppercase;
+    }
+
+    .progress-track {
+      height: 12px;
+      background: #334155;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .crack-resistance {
+      font-size: 13px;
+      font-style: italic;
+      color: var(--amber);
+    }
+
+    /* Grid layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Diversity Badges */
+    .diversity-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .diversity-item {
+      background: #0f172a;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .diversity-item.active {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .diversity-status {
+      font-weight: 700;
+      margin-right: 6px;
+    }
+
+    /* Entropy List */
+    .entropy-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .entropy-item:last-child { border-bottom: none; }
+    .entropy-label { font-size: 13px; font-weight: 600; }
+    .entropy-formula { font-size: 11px; color: var(--text-dim); }
+    .entropy-val { font-family: monospace; font-size: 14px; color: var(--cyan); font-weight: 700; }
+
+    /* Vulnerabilities & Suggestions */
+    .vuln-item {
+      background: rgba(239, 68, 68, 0.08);
+      border-left: 3px solid var(--crimson);
+      padding: 8px 12px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .recom-item {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    .clean-state {
+      color: var(--emerald);
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 0;
+    }
+
+    /* Tools */
+    .tool-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: filter 0.2s;
+    }
+    .tool-btn:hover { filter: brightness(1.15); }
+    .tool-btn.purple { background: var(--purple); }
+
+    .presets-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .preset-pill {
+      background: #334155;
+      color: var(--text);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .preset-pill:hover { background: #475569; }
+
+    footer {
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--text-dim);
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <h1>🛡️ PassGuard Auditor</h1>
+        <p>Volatile Shannon Entropy & Structural Vulnerability Analysis Engine</p>
+      </div>
+      <div class="privacy-tag">
+        <span>🔒 Zero Storage • In-Memory Only</span>
+      </div>
+    </header>
+
+    <!-- Input Card -->
+    <div class="card">
+      <div class="card-title">Real-Time Password Auditing</div>
+      <div class="input-wrapper">
+        <input type="password" id="passwordInput" placeholder="Type a password to test..." autofocus autocomplete="off">
+        <div class="input-actions">
+          <button class="btn-icon" id="toggleVisBtn">👁️ Show</button>
+          <button class="btn-icon" id="clearBtn">🗑️ Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gauge Card -->
+    <div class="card">
+      <div class="meter-header">
+        <div>
+          <span class="card-title" style="margin-bottom: 0;">Overall Strength</span>
+          <div class="score-badge" id="scoreBadge">0 / 100</div>
+        </div>
+        <div class="level-pill" id="levelPill" style="background-color: var(--crimson);">VERY WEAK</div>
+      </div>
+      <div class="progress-track">
+        <div class="progress-bar" id="progressBar" style="background-color: var(--crimson);"></div>
+      </div>
+      <div class="crack-resistance" id="crackResistance">Cracking Difficulty: Instant (< 1 millisecond)</div>
+    </div>
+
+    <!-- 2-Column Dashboard -->
+    <div class="dashboard-grid">
+      <!-- Left Column -->
+      <div>
+        <!-- Character Diversity -->
+        <div class="card">
+          <div class="card-title">Character Diversity</div>
+          <div style="font-size: 12px; color: var(--cyan); margin-bottom: 8px;" id="poolInfo">Pool (R): 0 • Length: 0</div>
+          <div class="diversity-grid">
+            <div class="diversity-item" id="divLower">
+              <span><span class="diversity-status" id="iconLower">✗</span> Lowercase (a-z)</span>
+              <strong id="cntLower">0</strong>
+            </div>
+            <div class="diversity-item" id="divUpper">
+              <span><span class="diversity-status" id="iconUpper">✗</span> Uppercase (A-Z)</span>
+              <strong id="cntUpper">0</strong>
+            </div>
+            <div class="diversity-item" id="divDigits">
+              <span><span class="diversity-status" id="iconDigits">✗</span> Digits (0-9)</span>
+              <strong id="cntDigits">0</strong>
+            </div>
+            <div class="diversity-item" id="divSymbols">
+              <span><span class="diversity-status" id="iconSymbols">✗</span> Special Symbols</span>
+              <strong id="cntSymbols">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Entropy Breakdown -->
+        <div class="card">
+          <div class="card-title">Information Entropy Breakdown</div>
+          <div class="entropy-item">
+            <div>
+              <div class="entropy-label">Shannon Symbol Entropy (H)</div>
+              <div class="entropy-formula">-Σ p(x) log₂(p(x))</div>
+            </div>
+            <div class="entropy-val" id="entropyPerChar">0.00 bits/char</div>
+          </div>
+          <div class="entropy-item">
+            <div>
+              <div class="entropy-label">Total Shannon Information</div>
+              <div class="entropy-formula">L × H(X)</div>
+            </div>
+            <div class="entropy-val" id="entropyTotal">0.00 bits</div>
+          </div>
+          <div class="entropy-item">
+            <div>
+              <div class="entropy-label">Keyspace Search Space</div>
+              <div class="entropy-formula">L × log₂(|R|)</div>
+            </div>
+            <div class="entropy-val" id="entropyKeyspace">0.00 bits</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div>
+        <!-- Vulnerabilities -->
+        <div class="card">
+          <div class="card-title">Vulnerabilities & Patterns Detected</div>
+          <div id="vulnList">
+            <div style="color: var(--text-dim); font-size: 13px;">No input yet.</div>
+          </div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="card">
+          <div class="card-title">Actionable Recommendations</div>
+          <div id="recomList">
+            <div style="color: var(--text-dim); font-size: 13px;">Enter a password to view suggestions.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tools & Benchmarks -->
+    <div class="card">
+      <div class="card-title">Interactive Tooling & Benchmarks</div>
+      <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+        <button class="tool-btn" id="genRandBtn">⚡ Generate 16-Char Random</button>
+        <button class="tool-btn purple" id="genXkcdBtn">📖 Generate XKCD Passphrase</button>
+      </div>
+
+      <div style="font-size: 12px; color: var(--text-muted); font-weight: 700;">TEST SAMPLES:</div>
+      <div class="presets-container">
+        <button class="preset-pill" data-pwd="123456">123456 (Sequential)</button>
+        <button class="preset-pill" data-pwd="p@ssword">p@ssword (Leetspeak)</button>
+        <button class="preset-pill" data-pwd="qwerty">qwerty (Walk)</button>
+        <button class="preset-pill" data-pwd="Summer2023!">Summer2023! (Hybrid)</button>
+        <button class="preset-pill" data-pwd="K9#m$P2!vL8@qR4&">K9#m$P2!vL8@qR4& (Robust)</button>
+        <button class="preset-pill" data-pwd="correct-horse-battery-staple-99!">correct-horse-battery-staple-99!</button>
+      </div>
+    </div>
+
+    <footer>
+      PassGuard Credential Auditor • CodeNova Batch 01 • Pure Python & Local Volatile Memory
+    </footer>
+  </div>
+
+  <script>
+    const passwordInput = document.getElementById("passwordInput");
+    const toggleVisBtn = document.getElementById("toggleVisBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const scoreBadge = document.getElementById("scoreBadge");
+    const levelPill = document.getElementById("levelPill");
+    const progressBar = document.getElementById("progressBar");
+    const crackResistance = document.getElementById("crackResistance");
+    const poolInfo = document.getElementById("poolInfo");
+
+    const divLower = document.getElementById("divLower");
+    const divUpper = document.getElementById("divUpper");
+    const divDigits = document.getElementById("divDigits");
+    const divSymbols = document.getElementById("divSymbols");
+
+    const iconLower = document.getElementById("iconLower");
+    const iconUpper = document.getElementById("iconUpper");
+    const iconDigits = document.getElementById("iconDigits");
+    const iconSymbols = document.getElementById("iconSymbols");
+
+    const cntLower = document.getElementById("cntLower");
+    const cntUpper = document.getElementById("cntUpper");
+    const cntDigits = document.getElementById("cntDigits");
+    const cntSymbols = document.getElementById("cntSymbols");
+
+    const entropyPerChar = document.getElementById("entropyPerChar");
+    const entropyTotal = document.getElementById("entropyTotal");
+    const entropyKeyspace = document.getElementById("entropyKeyspace");
+
+    const vulnList = document.getElementById("vulnList");
+    const recomList = document.getElementById("recomList");
+
+    const colorMap = {
+      "Very Weak": "#ef4444",
+      "Weak": "#f97316",
+      "Moderate": "#f59e0b",
+      "Strong": "#10b981",
+      "Very Strong": "#06b6d4"
+    };
+
+    async function evaluatePassword(pwd) {
+      try {
+        const resp = await fetch("/api/evaluate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: pwd })
+        });
+        const data = await resp.json();
+        updateUI(data, pwd.length);
+      } catch (err) {
+        console.error("Evaluation error:", err);
+      }
+    }
+
+    function updateUI(data, len) {
+      const score = data.score;
+      const level = data.strength_level;
+      const col = colorMap[level] || "#ef4444";
+
+      scoreBadge.innerText = `${score} / 100`;
+      scoreBadge.style.color = col;
+      levelPill.innerText = level.toUpperCase();
+      levelPill.style.backgroundColor = col;
+
+      progressBar.style.width = `${score}%`;
+      progressBar.style.backgroundColor = col;
+
+      crackResistance.innerText = `Cracking Difficulty: ${data.crack_time || "Instant"}`;
+      crackResistance.style.color = score >= 50 ? col : "#ef4444";
+
+      poolInfo.innerText = `Pool (R): ${data.entropy.pool_size} • Unique: ${data.unique_count || len} • Length: ${len}`;
+
+      // Diversity items
+      setDiversity(divLower, iconLower, cntLower, data.variety.has_lowercase, data.counts?.lower || 0);
+      setDiversity(divUpper, iconUpper, cntUpper, data.variety.has_uppercase, data.counts?.upper || 0);
+      setDiversity(divDigits, iconDigits, cntDigits, data.variety.has_digits, data.counts?.digit || 0);
+      setDiversity(divSymbols, iconSymbols, cntSymbols, data.variety.has_symbols, data.counts?.symbol || 0);
+
+      // Entropy
+      entropyPerChar.innerText = `${data.entropy.shannon_entropy_per_char} bits/char`;
+      entropyTotal.innerText = `${data.entropy.total_shannon_entropy} bits`;
+      entropyKeyspace.innerText = `${data.entropy.keyspace_entropy} bits`;
+
+      // Vulnerabilities
+      vulnList.innerHTML = "";
+      if (data.patterns_detected && data.patterns_detected.length > 0) {
+        data.patterns_detected.forEach(p => {
+          const div = document.createElement("div");
+          div.className = "vuln-item";
+          div.innerHTML = `<strong>[${p.severity.toUpperCase()}]</strong> ${p.description}`;
+          vulnList.appendChild(div);
+        });
+      } else if (len > 0) {
+        vulnList.innerHTML = '<div class="clean-state">✅ Clean — No dictionary matches, leetspeak, or predictable patterns found.</div>';
+      } else {
+        vulnList.innerHTML = '<div style="color: var(--text-dim); font-size: 13px;">No input yet.</div>';
+      }
+
+      // Recommendations
+      recomList.innerHTML = "";
+      if (data.suggestions && data.suggestions.length > 0) {
+        data.suggestions.forEach(sug => {
+          const div = document.createElement("div");
+          div.className = "recom-item";
+          div.innerHTML = `<span style="color: var(--cyan);">•</span> <span>${sug}</span>`;
+          recomList.appendChild(div);
+        });
+      }
+    }
+
+    function setDiversity(el, iconEl, cntEl, active, count) {
+      if (active) {
+        el.classList.add("active");
+        iconEl.innerText = "✓";
+        iconEl.style.color = "var(--emerald)";
+        cntEl.innerText = count;
+        cntEl.style.color = "var(--emerald)";
+      } else {
+        el.classList.remove("active");
+        iconEl.innerText = "✗";
+        iconEl.style.color = "var(--text-dim)";
+        cntEl.innerText = "0";
+        cntEl.style.color = "var(--text-dim)";
+      }
+    }
+
+    passwordInput.addEventListener("input", (e) => {
+      evaluatePassword(e.target.value);
+    });
+
+    toggleVisBtn.addEventListener("click", () => {
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleVisBtn.innerText = "🔒 Hide";
+      } else {
+        passwordInput.type = "password";
+        toggleVisBtn.innerText = "👁️ Show";
+      }
+    });
+
+    clearBtn.addEventListener("click", () => {
+      passwordInput.value = "";
+      evaluatePassword("");
+      passwordInput.focus();
+    });
+
+    document.querySelectorAll(".preset-pill").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const sample = btn.getAttribute("data-pwd");
+        passwordInput.value = sample;
+        evaluatePassword(sample);
+      });
+    });
+
+    document.getElementById("genRandBtn").addEventListener("click", async () => {
+      const resp = await fetch("/api/generate?type=random");
+      const data = await resp.json();
+      passwordInput.value = data.password;
+      evaluatePassword(data.password);
+    });
+
+    document.getElementById("genXkcdBtn").addEventListener("click", async () => {
+      const resp = await fetch("/api/generate?type=passphrase");
+      const data = await resp.json();
+      passwordInput.value = data.password;
+      evaluatePassword(data.password);
+    });
+
+    // Initial evaluation
+    evaluatePassword("");
+  </script>
+</body>
+</html>

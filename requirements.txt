@@ -1,0 +1,12 @@
+# PassGuard: Credential Auditing & Entropy Analysis Engine
+#
+# Requirements & Dependencies:
+# This project uses 100% Python Standard Library modules:
+# - tkinter & ttk (Built-in desktop GUI)
+# - http.server & urllib (Built-in web GUI server)
+# - secrets & string (CSPRNG password & passphrase generation)
+# - math & re (Shannon entropy calculations and pattern heuristics)
+# - unittest (Unit test suite)
+#
+# Compatibility: Python 3.8+ (Tested on Python 3.8, 3.9, 3.10, 3.11, 3.12, 3.13)
+# No external pip dependencies are required to run the GUI, CLI, Web dashboard, or tests.
